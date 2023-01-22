@@ -2,8 +2,12 @@ package ru.trick.springmangabot.makerKeyBord;
 
 
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.trick.springmangabot.ENUM.CallbackDataPartsEnum;
 import ru.trick.springmangabot.ENUM.DictionaryResourcePathEnum;
 
@@ -21,7 +25,7 @@ public class InlineKeyboardMaker {
 //                prefix + CallbackDataPartsEnum.TEMPLATE.name()
 //        ));
 //        return inlineKeyboardMarkup;
-    //}
+//    }
 
     public InlineKeyboardMarkup getInlineMessageButtons(String prefix, boolean isUserDictionaryNeed) {
 
@@ -53,6 +57,10 @@ public class InlineKeyboardMaker {
         keyboardButtonsRow.add(button);
         return keyboardButtonsRow;
     }
+
+
+
 }
+
 
 
