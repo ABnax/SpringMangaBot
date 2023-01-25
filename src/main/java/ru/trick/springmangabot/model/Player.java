@@ -24,16 +24,16 @@ public class Player {
     private Date time_sub_before;
 
 
-
-
     public Player(long id, String name, int balance, boolean subscription) {
         this.id = id;
         this.name = name;
         this.balance = balance;
         this.subscription = subscription;
+
     }
 
     public Player() {}
+
 
 
     public Date getTime_sub_before() {return time_sub_before;}

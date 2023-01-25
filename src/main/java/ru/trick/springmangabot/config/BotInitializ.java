@@ -16,10 +16,12 @@ import ru.trick.springmangabot.service.TG_bot;
 public class BotInitializ {
 
 
-        TG_bot bot;
+    TG_bot bot;
 
-        @Autowired
-        BotInitializ (TG_bot bot) {this.bot = bot;}
+    @Autowired
+    BotInitializ(TG_bot bot) {
+        this.bot = bot;
+    }
 
 
     @EventListener({ContextRefreshedEvent.class})
