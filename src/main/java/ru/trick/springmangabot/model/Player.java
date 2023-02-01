@@ -1,30 +1,30 @@
 package ru.trick.springmangabot.model;
 
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.util.Date;
 
 @Entity
 @Table(name = "player")
 public class Player {
+
     @Id
     @Column(name = "id")
     private long id;
 
     @Column(name = "name")
     private String name;
+
     @Column(name = "balance")
     private int balance;
+
     @Column(name = "subscription")
     private boolean subscription;
-
 
     @Column(name = "time_sub_before")
     @Temporal(TemporalType.DATE)
     private Date time_sub_before;
-
-
-
 
     public Player(long id, String name, int balance, boolean subscription) {
         this.id = id;
@@ -34,7 +34,6 @@ public class Player {
     }
 
     public Player() {}
-
 
     public Date getTime_sub_before() {return time_sub_before;}
 
@@ -68,10 +67,7 @@ public class Player {
         return subscription;
     }
 
-    public void setSubscription(boolean subscription) {
-        this.subscription = subscription;
-
-    }
+    public void setSubscription(boolean subscription) {this.subscription = subscription;}
 
 
 }
