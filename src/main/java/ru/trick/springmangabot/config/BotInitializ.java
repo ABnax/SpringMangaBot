@@ -15,14 +15,12 @@ import ru.trick.springmangabot.service.TG_bot;
 @Component
 public class BotInitializ {
 
-
     TG_bot bot;
 
     @Autowired
     BotInitializ(TG_bot bot) {
         this.bot = bot;
     }
-
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {

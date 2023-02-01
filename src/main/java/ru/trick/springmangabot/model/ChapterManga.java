@@ -1,13 +1,13 @@
 package ru.trick.springmangabot.model;
 
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
+//import javax.persistence.Column;
+//import javax.persistence.Entity;
+//import javax.persistence.Id;
+//import javax.persistence.Table;
 
 @Entity
-@Table(name = "chapterManga")
+@Table(name = "Manga")
 public class ChapterManga {
     @Id
     @Column(name = "id")
@@ -17,7 +17,7 @@ public class ChapterManga {
     @Column(name = "url")
     private String url;
     @Column(name = "name")
-    private String name;
+    private String nameManga;
     @Column(name = "price")
     private int price;
 
@@ -25,7 +25,7 @@ public class ChapterManga {
     public ChapterManga(int number, String url, String name, int price) {
         this.number = number;
         this.url = url;
-        this.name = name;
+        this.nameManga = name;
         this.price = price;
     }
 
@@ -53,12 +53,12 @@ public class ChapterManga {
         this.url = url;
     }
 
-    public String getName() {
-        return name;
+    public String getNameManga() {
+        return nameManga;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNameManga(String name) {
+        this.nameManga = name;
     }
 
     public int getPrice() {
