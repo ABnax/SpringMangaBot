@@ -26,6 +26,9 @@ public class Player {
     @Temporal(TemporalType.DATE)
     private Date time_sub_before;
 
+    @Column(name = "banStatus")
+    private boolean banStatus;
+
     public Player(long id, String name, int balance, boolean subscription) {
         this.id = id;
         this.name = name;
@@ -34,6 +37,10 @@ public class Player {
     }
 
     public Player() {}
+
+    public boolean isBanStatus() {return banStatus;}
+
+    public void setBanStatus(boolean banStatus) {this.banStatus = banStatus;}
 
     public Date getTime_sub_before() {return time_sub_before;}
 

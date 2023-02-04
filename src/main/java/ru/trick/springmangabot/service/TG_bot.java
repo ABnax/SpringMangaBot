@@ -8,6 +8,8 @@ import org.apache.catalina.connector.Response;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.invoices.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -29,16 +30,15 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.trick.springmangabot.config.BotConfig;
-import ru.trick.springmangabot.makerKeyBord.InlineKeyboard;
 import ru.trick.springmangabot.model.PaymentRequest;
 import ru.trick.springmangabot.model.Player;
 
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -48,28 +48,25 @@ public class TG_bot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     private final MainMenuServic mainMenuServic;
     private final KeyboardServic keyboardServic;
-    private final InlineKeyboard inlineKeyboard;
     private final PlayerService playerService;
-    private final ChapterMangaService chapterMangaService;
-    private final HttpClient httpClient;
     private final RestTemplate restTemplate;
     private boolean helpStatus = false;
+
     @Value("${qiwiApiKey}")
     private String qiwiApiKey ;
+
     @Value("${providerToken}")
     private String providerToken;
 
+    @Value("${chatIdAdmin}")
+    private long chatIdAdmin;
+
     @Autowired
-    public TG_bot(BotConfig botConfig, MainMenuServic mainMenuServic,
-                  KeyboardServic keyboardServic1, InlineKeyboard inlineKeyboard,
-                  PlayerService playerService, ChapterMangaService chapterMangaService, HttpClient httpClient, RestTemplate restTemplate) {
+    public TG_bot(BotConfig botConfig, MainMenuServic mainMenuServic, KeyboardServic keyboardServic1, PlayerService playerService, RestTemplate restTemplate) {
         this.botConfig = botConfig;
         this.mainMenuServic = mainMenuServic;
         this.keyboardServic = keyboardServic1;
-        this.inlineKeyboard = inlineKeyboard;
         this.playerService = playerService;
-        this.chapterMangaService = chapterMangaService;
-        this.httpClient = httpClient;
         this.restTemplate = restTemplate;
     }
 
@@ -90,154 +87,50 @@ public class TG_bot extends TelegramLongPollingBot {
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             final long chatId = callbackQuery.getMessage().getChatId();
-            final long messageId = callbackQuery.getMessage().getMessageId();
-            // default ответ, если получили неизвестную кнопку.
-            BotApiMethod<?> callBackAnswer = keyboardServic.sendMessageMenu(chatId, "Вы вернулись в главное меню");
             mainMenuServic.checkSub(chatId);
+            Player tempUser = playerService.takeUser(chatId);
 
+            String [] word = callbackQuery.getData().split("\\s");
+            switch (word[0]) {
+                case "menu" -> {
+                    try {
+                        if(tempUser.isSubscription()) {
+                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, word[1]));  }
 
-            switch (callbackQuery.getData()) {
-                case "buttonEmperor" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "Emperor"));
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                case "buttonEmperorFREE" -> {
+                case "menuFREE" -> {
                     try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "EmperorFREE"));
+                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, word[1]));
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                case "buttonStrongestEver" -> {
+                case "NextPage" -> {
                     try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "StrongestEver"));
+                        if (word.length == 1) {
+                            execute(keyboardServic.editMessage(callbackQuery));
+                        } else {
+                            execute(keyboardServic.editMessageFREE(callbackQuery));
+                        }
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                case "buttonStrongestEverFREE" -> {
+                case "ComeBack" -> {
                     try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "StrongestEverFREE"));
+                        if (word.length == 1) {
+                            execute(keyboardServic.editMessage2(callbackQuery));
+                        } else {
+                            execute(keyboardServic.editMessage2FREE(callbackQuery));
+                        }
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                case "buttonMyFateIsAVillain" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "MyFateIsAVillain"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonMyFateIsAVillainFREE" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "MyFateIsAVillainFREE"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonDukePendragonRegression" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "DukePendragonRegression"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonDukePendragonRegressionFREE" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "DukePendragonRegressionFREE"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonFullyArmed" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "FullyArmed"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonFullyArmedFREE" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "FullyArmedFREE"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonPlayGamesInPeace" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "PlayGamesInPeace"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonPlayGamesInPeaceFREE" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "PlayGamesInPeaceFREE"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonNextPage" -> {
-                    try {
-                        execute(keyboardServic.editMessage(callbackQuery));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonComeBack" -> {
-                    try {
-                        execute(keyboardServic.editMessage2(callbackQuery));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonNextPageFREE" -> {
-                    try {
-                        execute(keyboardServic.editMessageFREE(callbackQuery));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "buttonComeBackFREE" -> {
-                    try {
-                        execute(keyboardServic.editMessage2FREE(callbackQuery));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "MySkillCopyingOthers" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "MySkillCopyingOthers"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "MySkillCopyingOthersFREE" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "MySkillCopyingOthersFREE"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "BlackSummoner" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonNameManga(callbackQuery, "BlackSummoner"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "BlackSummonerFREE" -> {
-                    try {
-                        execute(keyboardServic.changeMessageButtonFREE(callbackQuery, "BlackSummonerFREE"));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                case "Подписка на Emperor" -> {
+                case "Подписка" -> {
                     try {
                         execute(mainMenuServic.sendMessage(chatId, "Вы подписались на рассылку новых глав.\nКогда выйдет новая глава, Вам придет уведомление об этом."));
                     } catch (TelegramApiException e) {
@@ -270,10 +163,9 @@ public class TG_bot extends TelegramLongPollingBot {
 //                        throw new RuntimeException(e);
 //                    }
 //                }
-
                 default -> {
                     try {
-                        execute(callBackAnswer);
+                        execute(keyboardServic.sendMessageMenu(chatId, "Что-то пошла не так. \nВы вернулись в главное меню"));
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
@@ -282,11 +174,11 @@ public class TG_bot extends TelegramLongPollingBot {
         }
 
 
-        if (update.hasPreCheckoutQuery()) {
-            long chatId = update.getPreCheckoutQuery().getFrom().getId();
-            PreCheckoutQuery preCheckoutQuery = update.getPreCheckoutQuery();
-            handlePreCheckoutQuery(preCheckoutQuery, chatId);
-        }
+//        if (update.hasPreCheckoutQuery()) {
+//            long chatId = update.getPreCheckoutQuery().getFrom().getId();
+//            PreCheckoutQuery preCheckoutQuery = update.getPreCheckoutQuery();
+//            handlePreCheckoutQuery(preCheckoutQuery, chatId);
+//        }
 
 
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -295,13 +187,55 @@ public class TG_bot extends TelegramLongPollingBot {
             long chatId = update.getMessage().getChatId();
             String nickName = update.getMessage().getChat().getUserName();
 
+            boolean tempAdminHelpStatus = true;
 
+            String[] words = messageText.split("\\s");
 
-            Pattern pattern = Pattern.compile("[ОоТтВвЕе] [1-90]+ [А-Яа-яA-Za-z1-9_*:^#$!(+=0/]+");
-            Matcher matcher = pattern.matcher(messageText);
-            if (chatId == 1088235267 && matcher.find()) mainMenuServic.returnMessageHelp(messageText);
-
-
+            // ADMIN команды
+            if (chatId == chatIdAdmin) {
+                switch (words[0]) {
+                    case "Ответ" -> {
+                        try {
+                            execute(mainMenuServic.returnMessageHelp(messageText));
+                            tempAdminHelpStatus = false;
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    case "Бан" -> {
+                        try {
+                            execute(mainMenuServic.banForHelp(messageText));
+                            tempAdminHelpStatus = false;
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    case "Разблокировать" -> {
+                        try {
+                            execute(mainMenuServic.unBanForHelp(messageText));
+                            tempAdminHelpStatus = false;
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    case "Добавить" -> {
+                        try {
+                            execute(mainMenuServic.mangaAdd(messageText, update));
+                            tempAdminHelpStatus = false;
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    case "Список" -> {
+                        try {
+                            execute(mainMenuServic.getListForName(messageText, chatId));
+                            tempAdminHelpStatus = false;
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
 
 
             if (helpStatus) {
@@ -318,7 +252,12 @@ public class TG_bot extends TelegramLongPollingBot {
                     }
                     default -> {
                         try {
+                            if(!playerService.takeUser(chatId).isBanStatus()){
                             execute(mainMenuServic.wrapperForDefaultReturnInHelo(chatId, nickName, firstNameUser, messageText));
+                            } else {
+                                execute(mainMenuServic.sendMessage(chatId, "Вам была выдана блокировка за флуд в <Помощь>" +
+                                        "\nДля разблокировки обращайтесь к -  @ballefant " ));
+                            }
                         } catch (TelegramApiException e) {
                             log.error("Исключение было выброшено в при отправкисообщение в помощь ( default )");
                             throw new RuntimeException(e);
@@ -327,7 +266,7 @@ public class TG_bot extends TelegramLongPollingBot {
                 }
             }
 
-            if (!helpStatus) {
+            if (!helpStatus && tempAdminHelpStatus) {
                 mainMenuServic.checkSub(chatId);
                 switch (messageText) {
                     case "/start" -> {
@@ -341,6 +280,7 @@ public class TG_bot extends TelegramLongPollingBot {
                     }
                     case "Профиль" -> {
                         try {
+                            execute(keyboardServic.deleteMessage(update));
                             execute(mainMenuServic.myProfile(chatId));
                         } catch (TelegramApiException e) {
                             log.error("Исключение было выброшено в при вызове методов для профиля.");
@@ -348,8 +288,8 @@ public class TG_bot extends TelegramLongPollingBot {
                         }
                     }
                     case "Каталог" -> {
-//  ------------------------------    Можно добавить картинку / что-то еще....
                         try {
+                            execute(keyboardServic.deleteMessage(update));
                             Player tempUser = playerService.takeUser(chatId);
                             if (tempUser.isSubscription()) {
                                 execute(keyboardServic.inlineMenu(chatId, "Что будем читать сегодня?"));
@@ -364,6 +304,7 @@ public class TG_bot extends TelegramLongPollingBot {
                     }
                     case "Подписка" -> {
                         try {
+                            execute(keyboardServic.deleteMessage(update));
                             execute(mainMenuServic.subscription(chatId));
                             execute(keyboardServic.sendMessageMenuSub(chatId, ""));
                         } catch (TelegramApiException e) {
@@ -373,6 +314,7 @@ public class TG_bot extends TelegramLongPollingBot {
                     }
                     case "Главное меню" -> {
                         try {
+                            execute(keyboardServic.deleteMessage(update));
                             execute(keyboardServic.sendMessageMenu(chatId, "Вы вернулись в главное меню"));
                         } catch (TelegramApiException e) {
                             log.error("Исключение было выброшено в при вызове метода для перехода в главное меню");
@@ -381,6 +323,7 @@ public class TG_bot extends TelegramLongPollingBot {
                     }
                     case "Закладки" -> {
                         try {
+                            execute(keyboardServic.deleteMessage(update));
                             execute(mainMenuServic.sendMessage(chatId, "В процессе работы..."));
                         } catch (TelegramApiException e) {
                             log.error("Исключение было выброшено в при вызове методов закладки");
@@ -393,8 +336,9 @@ public class TG_bot extends TelegramLongPollingBot {
 
                             //     Реализация через QIWI API -> TODO
                             //     execute(processPayment(1000L, String.valueOf(chatId)));
-                            execute(sendInvoice(chatId));
+                            // execute(sendInvoice(chatId));  // Оплата через Телеграмм
 
+                            execute(mainMenuServic.sendMessage(chatId, "В процессе..."));
 
                         } catch (TelegramApiException e) {
                             log.error("Исключение было выброшено в при вызове методов пополнения баланса");
@@ -418,6 +362,28 @@ public class TG_bot extends TelegramLongPollingBot {
                             throw new RuntimeException(e);
                         }
                     }
+                    case "Лист" -> {
+                        try {
+                            if (chatId == chatIdAdmin) {
+                                execute(mainMenuServic.sendMessage(chatId,
+                                        """
+                                                Название манг:\s
+                                                MyFateIsAVillain - Моя судьба злодея
+                                                DukePendragonRegression - Регрессия герцого Пендрагона
+                                                StrongestEver - Сильнейший во все времена
+                                                Emperor - Как демон император стал дворецким
+                                                FullyArmed - Во всеоружии
+                                                PlayGamesInPeace - Я просто хочу спокойно играть в игры
+                                                MySkillCopyingOthers - Мой Навык Копирование Способностей Других
+                                                BlackSummoner - Черный Призыватель"""));
+                            } else {
+                                execute(mainMenuServic.sendMessageForHelp(chatId, "Извините, такой команды нет."));
+                            }
+                        } catch (TelegramApiException e) {
+                            log.error("Исключение было выброшено в при вызове методов default");
+                        throw new RuntimeException(e);
+                    }
+                    }
                     default -> {
                         try {
                             execute(mainMenuServic.sendMessageForHelp(chatId, "Извините, такой команды нет."));
@@ -432,40 +398,42 @@ public class TG_bot extends TelegramLongPollingBot {
     }
 
 
-    public SendInvoice sendInvoice(Long chatId) {
-        SendInvoice sendInvoice = new SendInvoice();
+//    public SendInvoice sendInvoice(Long chatId) {
+//        SendInvoice sendInvoice = new SendInvoice();
+//
+//        sendInvoice.setChatId(chatId);
+//        sendInvoice.setCurrency("RUB");
+//        sendInvoice.setProviderToken(providerToken);
+//        sendInvoice.setTitle("Пополнения кошелька");
+//        sendInvoice.setDescription(" ");
+//        sendInvoice.setPayload("text payload");
+//        sendInvoice.setPrices(Collections.singletonList(new LabeledPrice("Пополнить", 6000)));
+//
+//        return sendInvoice;
+//    }
+//
+//    private void handlePreCheckoutQuery(PreCheckoutQuery preCheckoutQuery, long chatId) {
+//        try {
+//            if (checkPayment(preCheckoutQuery.getInvoicePayload())) {
+//                sendApiMethod(new AnswerPreCheckoutQuery(preCheckoutQuery.getId(), true, "Pre-payment check succeeded"));
+//                Player tempUser = playerService.takeUser(chatId);
+//                tempUser.setBalance(tempUser.getBalance() + 60);
+//                playerService.update(tempUser);
+//            } else {
+//                sendApiMethod(new AnswerPreCheckoutQuery(preCheckoutQuery.getId(), false, "Pre-payment check failed"));
+//            }
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private boolean checkPayment(String invoicePayload) {
+//        // Придумать логику проверки.....
+//        return true;
+//    }
 
-        sendInvoice.setChatId(chatId);
-        sendInvoice.setCurrency("RUB");
-        sendInvoice.setProviderToken(providerToken);
-        sendInvoice.setTitle("Пополнения кошелька");
-        sendInvoice.setDescription(" ");
-        sendInvoice.setPayload("text payload");
-        sendInvoice.setPrices(Collections.singletonList(new LabeledPrice("Пополнить", 6000)));
 
-        return sendInvoice;
-
-    }
-
-    private void handlePreCheckoutQuery(PreCheckoutQuery preCheckoutQuery, long chatId) {
-        try {
-            if (checkPayment(preCheckoutQuery.getInvoicePayload())) {
-                sendApiMethod(new AnswerPreCheckoutQuery(preCheckoutQuery.getId(), true, "Pre-payment check succeeded"));
-                Player tempUser = playerService.takeUser(chatId);
-                tempUser.setBalance(tempUser.getBalance() + 60);
-                playerService.update(tempUser);
-            } else {
-                sendApiMethod(new AnswerPreCheckoutQuery(preCheckoutQuery.getId(), false, "Pre-payment check failed"));
-            }
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean checkPayment(String invoicePayload) {
-        // Придумать логику проверки.....
-        return true;
-    }
+    ////////////////////////////////////////////////           TEST OPLATA QIWI             /////////////////////////////////////////////////////
 
 //    public void processPayment(Long amount, String userId) throws UnsupportedEncodingException {
 //        HttpPost request = new HttpPost("https://api.qiwi.com/partner/bill/v1/bills/payment");
