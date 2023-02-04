@@ -24,4 +24,9 @@ public class ChapterMangaService {
         return chanterMangaRepository.findByNameManga(name);
     }
 
+    public void addManga (ChapterManga chapterManga) {
+        chanterMangaRepository.save(chapterManga);
+    }
+
+
 }

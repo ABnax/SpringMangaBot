@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ChanterMangaRepository extends CrudRepository<ChapterManga, Long> {
     List<ChapterManga> findByNameManga(String name);
+
 }

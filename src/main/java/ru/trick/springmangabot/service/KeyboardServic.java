@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.trick.springmangabot.makerKeyBord.InlineKeyboard;
 import ru.trick.springmangabot.makerKeyBord.ReplyKeyboardMaker;
 
@@ -35,10 +36,10 @@ public class KeyboardServic {
     }
 
 
-    public DeleteMessage deleteMessage(CallbackQuery callbackQuery) {
+    public DeleteMessage deleteMessage(Update update) {
         DeleteMessage deleteMessage = new DeleteMessage();
-        deleteMessage.setMessageId(callbackQuery.getMessage().getMessageId());
-        deleteMessage.setChatId(callbackQuery.getMessage().getChatId());
+        deleteMessage.setMessageId(update.getMessage().getMessageId());
+        deleteMessage.setChatId(update.getMessage().getChatId());
         return deleteMessage;
     }
 

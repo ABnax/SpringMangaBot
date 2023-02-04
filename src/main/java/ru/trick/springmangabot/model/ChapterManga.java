@@ -11,6 +11,7 @@ import jakarta.persistence.*;
 public class ChapterManga {
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "number")
     private int number;
@@ -27,6 +28,11 @@ public class ChapterManga {
         this.url = url;
         this.nameManga = name;
         this.price = price;
+    }
+    public ChapterManga(int number, String url, String name) {
+        this.number = number;
+        this.url = url;
+        this.nameManga = name;
     }
 
     public int getId() {

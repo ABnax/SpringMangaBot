@@ -34,13 +34,13 @@ public class InlineKeyboard {
         InlineKeyboardButton buttonDukePendragonRegression = new InlineKeyboardButton("Регрессия герцого Пендрагона");
         InlineKeyboardButton buttonNextPage = new InlineKeyboardButton(" --- Следующая страница ---> ");
 
-        buttonEmperor.setCallbackData("buttonEmperor");
-        buttonMyFateIsAVillain.setCallbackData("buttonMyFateIsAVillain");
-        buttonStrongestEver.setCallbackData("buttonStrongestEver");
-        buttonFullyArmed.setCallbackData("MySkillCopyingOthers");
-        buttonPlayGamesInPeace.setCallbackData("BlackSummoner");
-        buttonDukePendragonRegression.setCallbackData("buttonDukePendragonRegression");
-        buttonNextPage.setCallbackData("buttonNextPage");
+        buttonEmperor.setCallbackData("menu Emperor");
+        buttonMyFateIsAVillain.setCallbackData("menu MyFateIsAVillain");
+        buttonStrongestEver.setCallbackData("menu StrongestEver");
+        buttonFullyArmed.setCallbackData("menu MySkillCopyingOthers");
+        buttonPlayGamesInPeace.setCallbackData("menu BlackSummoner");
+        buttonDukePendragonRegression.setCallbackData("menu DukePendragonRegression");
+        buttonNextPage.setCallbackData("NextPage");
 
 
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
@@ -92,13 +92,13 @@ public class InlineKeyboard {
         InlineKeyboardButton buttonComeBack = new InlineKeyboardButton(" <--- Вернуться назад --- ");
 
 
-        buttonName1.setCallbackData("buttonFullyArmed");
-        buttonName2.setCallbackData("buttonPlayGamesInPeace");
+        buttonName1.setCallbackData("menu FullyArmed");
+        buttonName2.setCallbackData("menu PlayGamesInPeace");
         buttonName3.setCallbackData("\uD83D\uDD1C");
         buttonName4.setCallbackData("\uD83D\uDD1C");
         buttonName5.setCallbackData("\uD83D\uDD1C");
         buttonName6.setCallbackData("\uD83D\uDD1C");
-        buttonComeBack.setCallbackData("buttonComeBack");
+        buttonComeBack.setCallbackData("ComeBack");
 
 
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
@@ -154,7 +154,7 @@ public class InlineKeyboard {
         InlineKeyboardButton buttonName8 = new InlineKeyboardButton(String.valueOf(list.get(7).getNumber()));
         InlineKeyboardButton buttonName9 = new InlineKeyboardButton(String.valueOf(list.get(8).getNumber()));
         InlineKeyboardButton buttonName10 = new InlineKeyboardButton(String.valueOf(list.get(9).getNumber()));
-        InlineKeyboardButton FREE = new InlineKeyboardButton("Остальные главы");
+        InlineKeyboardButton FREE = new InlineKeyboardButton("Все главы");
         InlineKeyboardButton buttonSub = new InlineKeyboardButton("Подписаться на выход новых глав");
         InlineKeyboardButton buttonComeBack = new InlineKeyboardButton(" <--- Вернуться назад --- ");
 
@@ -170,8 +170,8 @@ public class InlineKeyboard {
         buttonName9.setUrl(list.get(8).getUrl());
         buttonName10.setUrl(list.get(9).getUrl());
         FREE.setUrl(free.get(0).getUrl());
-        buttonSub.setCallbackData("Подписка на " + list.get(0).getNameManga());
-        buttonComeBack.setCallbackData("buttonComeBack");
+        buttonSub.setCallbackData("Подписка");
+        buttonComeBack.setCallbackData("ComeBack");
 
 
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
@@ -222,13 +222,13 @@ public class InlineKeyboard {
         InlineKeyboardButton buttonDukePendragonRegression = new InlineKeyboardButton("Регрессия герцого Пендрагона");
         InlineKeyboardButton buttonNextPage = new InlineKeyboardButton(" --- Следующая страница ---> ");
 
-        buttonEmperor.setCallbackData("buttonEmperorFREE");
-        buttonMyFateIsAVillain.setCallbackData("buttonMyFateIsAVillainFREE");
-        buttonStrongestEver.setCallbackData("buttonStrongestEverFREE");
-        buttonFullyArmed.setCallbackData("MySkillCopyingOthersFREE");
-        buttonPlayGamesInPeace.setCallbackData("BlackSummonerFREE");
-        buttonDukePendragonRegression.setCallbackData("buttonDukePendragonRegressionFREE");
-        buttonNextPage.setCallbackData("buttonNextPageFREE");
+        buttonEmperor.setCallbackData("menuFREE EmperorFREE");
+        buttonMyFateIsAVillain.setCallbackData("menuFREE MyFateIsAVillainFREE");
+        buttonStrongestEver.setCallbackData("menuFREE StrongestEverFREE");
+        buttonFullyArmed.setCallbackData("menuFREE MySkillCopyingOthersFREE");
+        buttonPlayGamesInPeace.setCallbackData("menuFREE BlackSummonerFREE");
+        buttonDukePendragonRegression.setCallbackData("menuFREE DukePendragonRegressionFREE");
+        buttonNextPage.setCallbackData("NextPage FREE");
 
 
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
@@ -280,13 +280,13 @@ public class InlineKeyboard {
         InlineKeyboardButton buttonComeBack = new InlineKeyboardButton(" <--- Вернуться назад --- ");
 
 
-        buttonName1.setCallbackData("buttonFullyArmedFREE");
-        buttonName2.setCallbackData("buttonPlayGamesInPeaceFREE");
+        buttonName1.setCallbackData("menuFREE FullyArmedFREE");
+        buttonName2.setCallbackData("menuFREE PlayGamesInPeaceFREE");
         buttonName3.setCallbackData("\uD83D\uDD1C");
         buttonName4.setCallbackData("\uD83D\uDD1C");
         buttonName5.setCallbackData("\uD83D\uDD1C");
         buttonName6.setCallbackData("\uD83D\uDD1C");
-        buttonComeBack.setCallbackData("buttonComeBackFREE");
+        buttonComeBack.setCallbackData("ComeBack FREE");
 
 
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
@@ -329,12 +329,12 @@ public class InlineKeyboard {
 
         List<ChapterManga> list = chapterMangaService.findAll(name);
 
-        InlineKeyboardButton buttonName1 = new InlineKeyboardButton("Бесплатные главы");
+        InlineKeyboardButton buttonName1 = new InlineKeyboardButton("Все главы");
 
         InlineKeyboardButton buttonComeBack = new InlineKeyboardButton(" <--- Вернуться назад --- ");
         buttonName1.setUrl(list.get(0).getUrl());
 
-        buttonComeBack.setCallbackData("buttonComeBackFREE");
+        buttonComeBack.setCallbackData("ComeBack FREE");
 
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
         keyboardButtonsRow1.add(buttonName1);
