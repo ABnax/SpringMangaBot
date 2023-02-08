@@ -16,17 +16,11 @@ public class ChapterMangaService {
         this.chanterMangaRepository = chanterMangaRepository;
     }
 
-    public ChapterManga findOne(Long id) {
-        return chanterMangaRepository.findById(id).orElse(null);
-    }
+    public ChapterManga findOne(Long id) {return chanterMangaRepository.findById(id).orElse(null);}
 
-    public List<ChapterManga> findAll(String name) {
-        return chanterMangaRepository.findByNameManga(name);
-    }
+    public List<ChapterManga> findAll(String name) {return chanterMangaRepository.findByNameManga(name);}
 
-    public void addManga (ChapterManga chapterManga) {
-        chanterMangaRepository.save(chapterManga);
-    }
+    public void addManga (ChapterManga chapterManga) {chanterMangaRepository.save(chapterManga);}
 
 
 }

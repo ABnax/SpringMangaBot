@@ -3,8 +3,11 @@ package ru.trick.springmangabot.makerKeyBord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import ru.trick.springmangabot.model.Alert;
 import ru.trick.springmangabot.model.ChapterManga;
+import ru.trick.springmangabot.service.AlertService;
 import ru.trick.springmangabot.service.ChapterMangaService;
 
 import java.util.ArrayList;
@@ -16,10 +19,12 @@ import java.util.stream.Collectors;
 public class InlineKeyboard {
 
     private final ChapterMangaService chapterMangaService;
+    private final AlertService alertService;
 
     @Autowired
-    public InlineKeyboard(ChapterMangaService chapterMangaService) {
+    public InlineKeyboard(ChapterMangaService chapterMangaService, AlertService alertService) {
         this.chapterMangaService = chapterMangaService;
+        this.alertService = alertService;
     }
 
     public InlineKeyboardMarkup getInlineMessageButtons() {
@@ -170,7 +175,7 @@ public class InlineKeyboard {
         buttonName9.setUrl(list.get(8).getUrl());
         buttonName10.setUrl(list.get(9).getUrl());
         FREE.setUrl(free.get(0).getUrl());
-        buttonSub.setCallbackData("Подписка");
+        buttonSub.setCallbackData("Alert " + name);
         buttonComeBack.setCallbackData("ComeBack");
 
 
@@ -353,4 +358,141 @@ public class InlineKeyboard {
     }
 
 
+    public InlineKeyboardMarkup getInlineButtonAlert (long chatId) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+
+        List<Alert> listAlert = alertService.takeAlertForUser(chatId);
+
+        String nameManga = " - ";
+
+        for (Alert ltAlert : listAlert) {
+
+            switch (ltAlert.getNameManga()){
+                case "Emperor" -> nameManga = "Как демон император стал дворецким";
+                case "MyFateIsAVillain" -> nameManga = "Моя судьба злодея";
+                case "StrongestEver" -> nameManga = "Сильнейший во все времена";
+                case "MySkillCopyingOthers" -> nameManga = "Мой Навык Копирование Способностей Других";
+                case "BlackSummoner" -> nameManga = "Черный Призыватель";
+                case "DukePendragonRegression" -> nameManga = "Регрессия герцого Пендрагона";
+                case "FullyArmed" -> nameManga = "Во всеоружии";
+                case "PlayGamesInPeace" -> nameManga = "Я просто хочу спокойно играть в игры";
+            }
+
+            InlineKeyboardButton button  = new InlineKeyboardButton(nameManga);
+
+            button.setCallbackData("BookMarks " + ltAlert.getNameManga());
+
+            List<InlineKeyboardButton> keyboardButtons = new ArrayList<>();
+            keyboardButtons.add(button);
+            rowList.add(keyboardButtons);
+        }
+
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+
+        return inlineKeyboardMarkup;
+    }
+
+    public InlineKeyboardMarkup getInlineButtonDeleteBookMarks(long chatId, String nameManga) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+
+
+        InlineKeyboardButton buttonName1 = new InlineKeyboardButton(" ❌ Отписаться ❌ ");
+        InlineKeyboardButton buttonComeBack = new InlineKeyboardButton(" <--- Вернуться назад --- ");
+
+        buttonName1.setCallbackData("BookMarksOFF " + nameManga);
+
+        buttonComeBack.setCallbackData("ComeBackBookMarks");
+
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        keyboardButtonsRow1.add(buttonName1);
+
+        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+        keyboardButtonsRow2.add(buttonComeBack);
+
+
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(keyboardButtonsRow1);
+        rowList.add(keyboardButtonsRow2);
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+
+        return inlineKeyboardMarkup;
+    }
+
+
+    public InlineKeyboardMarkup getInlineButtonPay (String urlPay) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+
+        InlineKeyboardButton buttonName1 = new InlineKeyboardButton("Оплатить");
+        InlineKeyboardButton buttonComeBack = new InlineKeyboardButton("Проверить оплату");
+
+        buttonName1.setUrl(urlPay);
+
+        buttonComeBack.setCallbackData("CheckPay");
+
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        keyboardButtonsRow1.add(buttonName1);
+
+        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+        keyboardButtonsRow2.add(buttonComeBack);
+
+
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(keyboardButtonsRow1);
+        rowList.add(keyboardButtonsRow2);
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+
+        return inlineKeyboardMarkup;
+    }
+
+
+    public InlineKeyboardMarkup getInlineButtonCancelPay () {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+        InlineKeyboardButton buttonComeBack = new InlineKeyboardButton("Отменить платеж");
+
+        buttonComeBack.setCallbackData("CancelPay");
+
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        keyboardButtonsRow1.add(buttonComeBack);
+
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(keyboardButtonsRow1);
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+
+        return inlineKeyboardMarkup;
+    }
+
+
+    public InlineKeyboardMarkup getInlineButtonIntermediatePay () {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+
+        InlineKeyboardButton buttonName1 = new InlineKeyboardButton("Все верно");
+        InlineKeyboardButton buttonComeBack = new InlineKeyboardButton("Отмена");
+
+        buttonName1.setCallbackData("Pay");
+        buttonComeBack.setCallbackData("Cancel");
+
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        keyboardButtonsRow1.add(buttonName1);
+
+        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+        keyboardButtonsRow2.add(buttonComeBack);
+
+
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(keyboardButtonsRow1);
+        rowList.add(keyboardButtonsRow2);
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+
+        return inlineKeyboardMarkup;
+    }
 }

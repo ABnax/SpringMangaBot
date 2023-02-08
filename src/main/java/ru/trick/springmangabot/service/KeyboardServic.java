@@ -16,16 +16,18 @@ public class KeyboardServic {
 
     private final ReplyKeyboardMaker replyKeyboardMaker;
     private final InlineKeyboard inlineKeyboard;
+    private final AlertService alertService;
 
     @Autowired
-    public KeyboardServic(ReplyKeyboardMaker replyKeyboardMaker, InlineKeyboard inlineKeyboard) {
+    public KeyboardServic(ReplyKeyboardMaker replyKeyboardMaker, InlineKeyboard inlineKeyboard, AlertService alertService) {
         this.replyKeyboardMaker = replyKeyboardMaker;
         this.inlineKeyboard = inlineKeyboard;
+        this.alertService = alertService;
     }
 
     public SendMessage sendMessageMenuSub(long chatId, String textSend) {
         SendMessage sendMessage = new SendMessage(String.valueOf(chatId), textSend);
-        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboardForSub());
+        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboardForSub(chatId));
         return sendMessage;
     }
 
@@ -110,6 +112,52 @@ public class KeyboardServic {
 
         return editMessage;
     }
+
+    public SendMessage sendMenuBookmarks(long chatId, String textSend) {
+        SendMessage sendMessage = new SendMessage(String.valueOf(chatId), textSend);
+        if (alertService.takeAlertForUser(chatId).size() == 0) {
+            sendMessage.setText(textSend + "\nВы пока еще не добавили закладки.");
+        } else {
+            sendMessage.setReplyMarkup(inlineKeyboard.getInlineButtonAlert(chatId));
+        }
+        return sendMessage;
+    }
+
+    public EditMessageReplyMarkup changeMessageBookMarks(long chatId, CallbackQuery callbackQuery, String nemaManga) {
+        EditMessageReplyMarkup editMessage = new EditMessageReplyMarkup();
+        editMessage.setMessageId(callbackQuery.getMessage().getMessageId());
+        editMessage.setChatId(callbackQuery.getMessage().getChatId());
+        editMessage.setReplyMarkup(inlineKeyboard.getInlineButtonDeleteBookMarks(chatId, nemaManga));
+        return editMessage;
+    }
+
+
+    public EditMessageReplyMarkup editMessageBookMarks (CallbackQuery callbackQuery) {
+        EditMessageReplyMarkup editMessage = new EditMessageReplyMarkup();
+        editMessage.setMessageId(callbackQuery.getMessage().getMessageId());
+        editMessage.setChatId(callbackQuery.getMessage().getChatId());
+        editMessage.setReplyMarkup(inlineKeyboard.getInlineButtonAlert(callbackQuery.getMessage().getChatId()));
+
+        return editMessage;
+    }
+
+    public SendMessage inlineMenuPay(long chatId, String textSend, String urlPay) {
+        SendMessage sendMessage = new SendMessage(String.valueOf(chatId), textSend);
+        sendMessage.setReplyMarkup(inlineKeyboard.getInlineButtonPay(urlPay));
+        return sendMessage;
+    }
+
+    public SendMessage inlineMenuCancelPay(long chatId, String textSend) {
+        SendMessage sendMessage = new SendMessage(String.valueOf(chatId), textSend);
+        sendMessage.setReplyMarkup(inlineKeyboard.getInlineButtonCancelPay());
+        return sendMessage;
+    }
+    public SendMessage inlineMenuIntermediatelPay(long chatId, String textSend) {
+        SendMessage sendMessage = new SendMessage(String.valueOf(chatId), textSend);
+        sendMessage.setReplyMarkup(inlineKeyboard.getInlineButtonIntermediatePay());
+        return sendMessage;
+    }
+
 
 
 }

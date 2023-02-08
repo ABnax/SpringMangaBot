@@ -6,6 +6,7 @@ import ru.trick.springmangabot.model.Player;
 import ru.trick.springmangabot.repository.PlayerRepository;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class PlayerService {
@@ -18,6 +19,9 @@ public class PlayerService {
 
     public Player takeUser(long chatId) {
         return playerRepository.findById(chatId).get();
+    }
+    public Optional <Player> firstUser(long chatId) {
+        return playerRepository.findById(chatId);
     }
 
     public void update(long chatId, int balance, boolean subscription, Date time_sub_before) {

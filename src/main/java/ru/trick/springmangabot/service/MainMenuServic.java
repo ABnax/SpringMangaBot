@@ -7,10 +7,12 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.trick.springmangabot.makerKeyBord.ReplyKeyboardMaker;
+import ru.trick.springmangabot.model.Alert;
 import ru.trick.springmangabot.model.ChapterManga;
 import ru.trick.springmangabot.model.Player;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,18 +25,20 @@ public class MainMenuServic {
     private final KeyboardServic keyboardServic;
 
     private final ChapterMangaService chapterMangaService;
+    private final AlertService alertService;
 
     @Autowired
-    public MainMenuServic(PlayerService playerService, ReplyKeyboardMaker replyKeyboardMaker, KeyboardServic keyboardServic, ChapterMangaService chapterMangaService) {
+    public MainMenuServic(PlayerService playerService, ReplyKeyboardMaker replyKeyboardMaker, KeyboardServic keyboardServic, ChapterMangaService chapterMangaService, AlertService alertService) {
         this.playerService = playerService;
         this.replyKeyboardMaker = replyKeyboardMaker;
         this.keyboardServic = keyboardServic;
         this.chapterMangaService = chapterMangaService;
+        this.alertService = alertService;
     }
 
-    public SendMessage wrapperForDefaultReturnInHelo(long chatId, String nickName, String firstNameUser, String messageText) {
+    public SendMessage wrapperForDefaultReturnInHelo(long chatId, String nickName, String firstNameUser, String messageText, long adminChatId) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
+        sendMessage.setChatId(adminChatId);
         sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenu());
 
         sendMessage.setText("Вам пишет: " + firstNameUser + " " + "@" + nickName + "\nID: " + chatId + "\n" + messageText);
@@ -64,7 +68,7 @@ public class MainMenuServic {
     public SendMessage complitStart(long chatId, Update update) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
-        if (playerService.takeUser(chatId) == null) {
+        if (playerService.firstUser(chatId).isEmpty()) {
             playerService.firstCreateAccount(chatId, update.getMessage().getChat().getFirstName());
         }
         log.info("Replied user: " + update.getMessage().getChat().getFirstName());
@@ -85,21 +89,21 @@ public class MainMenuServic {
         String statusSub = " ❌ ";
 
         if (userTemp.isSubscription()) {
-            statusSub = "✅";
+            statusSub = " ✅ ";
         }
 
         if (userTemp.getTime_sub_before() == null) {
-            text = "\uD83D\uDCBC Ваш профиль: \n  Ваше имя: " + userTemp.getName() + '\n' + "  ID: " + userTemp.getId() + '\n' +
+            text = "\uD83D\uDCBC Ваш профиль: \n  Ваше имя: " + userTemp.getName() + '\n' + "  \uD83C\uDD94 " + userTemp.getId() + '\n' +
                     "  Статус подписки: " + statusSub + '\n' + "* Стоимость подписки: 250 руб." + "\n  Баланс: " + userTemp.getBalance();
         } else {
-            text = "\uD83D\uDCBC Ваш профиль: \n  Ваше имя: " + userTemp.getName() + '\n' + "  ID: " + userTemp.getId() + '\n'
+            text = "\uD83D\uDCBC Ваш профиль: \n  Ваше имя: " + userTemp.getName() + '\n' + "  \uD83C\uDD94 " + userTemp.getId() + '\n'
                     + "  Статус подписки: " + statusSub + '\n' + "  Подписка активна до: " + userTemp.getTime_sub_before()
                     + "\n  Баланс: " + userTemp.getBalance();
         }
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(text);
-        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboardForProfiel());
+        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboardForProfiel(chatId));
 
         return sendMessage;
     }
@@ -121,13 +125,13 @@ public class MainMenuServic {
                 userTemp.setSubscription(true);
                 userTemp.setTime_sub_before(new Date(new Date().getTime() + 2678400000L));
                 String stringDate = dateFormat.format(userTemp.getTime_sub_before());
-                sendMessage.setText("Подписка куплена!" + "\nПодписка активна до: " + stringDate + " \nСпасибо за покупку.\n" + "Ваш баланс: " + userTemp.getBalance());
+                sendMessage.setText("Подписка куплена!  \uD83C\uDF89" + "\nПодписка активна до: " + stringDate + " \nСпасибо за покупку.\n" + "Ваш баланс: " + userTemp.getBalance());
                 playerService.update(chatId, userTemp.getBalance(), userTemp.isSubscription(), userTemp.getTime_sub_before());
             } else if (userTemp.getTime_sub_before() != null) {
                 userTemp.getTime_sub_before().setTime(userTemp.getTime_sub_before().getTime() + 2678400000L);
                 String stringDate = dateFormat.format(userTemp.getTime_sub_before());
                 playerService.update(chatId, userTemp.getBalance(), userTemp.isSubscription(), userTemp.getTime_sub_before());
-                sendMessage.setText("Подписка продлена на месяц!" + "\nПодписка активна до: " + stringDate + " \nСпасибо за покупку.\n" + "Ваш баланс: " + userTemp.getBalance());
+                sendMessage.setText("Подписка продлена на месяц!  \uD83C\uDF89" + "\nПодписка активна до: " + stringDate + " \nСпасибо за покупку.\n" + "Ваш баланс: " + userTemp.getBalance());
             }
         } else {
             sendMessage.setText("Недостаточно средств на балансе.");
@@ -162,7 +166,7 @@ public class MainMenuServic {
             String answer = "Статус Вашей подписки: " + statusSub + '\n' + "* Стоимость подписки: 250 руб." + '\n' + "* Подписка покупается на 31 день от момента покупки.";
             sendMessage.setText(answer);
         }
-        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboardForSub());
+        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboardForSub(chatId));
         return sendMessage;
     }
 
@@ -235,5 +239,19 @@ public class MainMenuServic {
     }
 
 
+    public List<Long> sendMessageForUpdate (String nameManga) {
+        List <Alert> listAlert = alertService.takeAlertForNameManga(nameManga);
+        List <Long> listForChatId = new ArrayList<>();
+
+        for(Alert lt : listAlert) {
+            listForChatId.add(lt.getChatId());
+        }
+            return listForChatId;
+    }
+
+
+    public void BookMarksOFF(long chatId, String nameManga) {
+        alertService.deleteAlertForUser(chatId, nameManga);
+    }
 }
 

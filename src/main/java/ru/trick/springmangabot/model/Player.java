@@ -4,6 +4,7 @@ package ru.trick.springmangabot.model;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "player")
@@ -28,6 +29,8 @@ public class Player {
 
     @Column(name = "banStatus")
     private boolean banStatus;
+
+
 
     public Player(long id, String name, int balance, boolean subscription) {
         this.id = id;
