@@ -10,6 +10,7 @@ public enum ButtonNameEnum {
 
     BACK_FOR_START_MENU2 ("Назад"),
     BUY_MONEY ("Пополнить баланс"),
+    BUY_SUB2("Продлить подписку"),
     BUY_SUB("Купить подписку");
 
     private final String buttonName;

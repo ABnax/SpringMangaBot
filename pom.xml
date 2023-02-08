@@ -73,7 +73,11 @@
 			<artifactId>telegrambots</artifactId>
 			<version>6.1.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.qiwi</groupId>
+			<artifactId>bill-payments-java-sdk</artifactId>
+			<version>1.5.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

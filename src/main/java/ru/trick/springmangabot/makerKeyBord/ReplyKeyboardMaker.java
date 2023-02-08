@@ -1,11 +1,13 @@
 package ru.trick.springmangabot.makerKeyBord;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.invoices.CreateInvoiceLink;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.trick.springmangabot.ENUM.ButtonNameEnum;
+import ru.trick.springmangabot.model.Player;
+import ru.trick.springmangabot.service.PlayerService;
 //import ru.betake.telegram.writeRead.constants.bot.ButtonNameEnum;
 
 import java.util.ArrayList;
@@ -13,6 +15,14 @@ import java.util.List;
 
 @Component
 public class ReplyKeyboardMaker {
+
+
+    private final PlayerService playerService;
+
+    @Autowired
+    public ReplyKeyboardMaker(PlayerService playerService) {
+        this.playerService = playerService;
+    }
 
     public ReplyKeyboardMarkup getMainMenuKeyboard() {
         KeyboardRow row1 = new KeyboardRow();
@@ -37,10 +47,16 @@ public class ReplyKeyboardMaker {
         return replyKeyboardMarkup;
     }
 
-    public ReplyKeyboardMarkup getMainMenuKeyboardForSub() {
+    public ReplyKeyboardMarkup getMainMenuKeyboardForSub(Long chatId) {
         KeyboardRow row01 = new KeyboardRow();
-        row01.add(new KeyboardButton(ButtonNameEnum.BUY_SUB.getButtonName()));
 
+        Player tempUser = playerService.takeUser(chatId);
+
+        if (tempUser.isSubscription()) {
+            row01.add(new KeyboardButton(ButtonNameEnum.BUY_SUB2.getButtonName()));
+        } else {
+            row01.add(new KeyboardButton(ButtonNameEnum.BUY_SUB.getButtonName()));
+        }
 
         KeyboardRow row02 = new KeyboardRow();
         row02.add(new KeyboardButton(ButtonNameEnum.BACK_FOR_START_MENU.getButtonName()));
@@ -59,11 +75,17 @@ public class ReplyKeyboardMaker {
         return replyKeyboardMarkupSub;
     }
 
-    public ReplyKeyboardMarkup getMainMenuKeyboardForProfiel() {
+    public ReplyKeyboardMarkup getMainMenuKeyboardForProfiel(Long chatId) {
 
-
+        Player tempUser = playerService.takeUser(chatId);
         KeyboardRow row002 = new KeyboardRow();
-        row002.add(new KeyboardButton(ButtonNameEnum.BUY_SUB.getButtonName()));
+
+        if (tempUser.isSubscription()) {
+            row002.add(new KeyboardButton(ButtonNameEnum.BUY_SUB2.getButtonName()));
+        } else {
+            row002.add(new KeyboardButton(ButtonNameEnum.BUY_SUB.getButtonName()));
+        }
+
         row002.add(new KeyboardButton(ButtonNameEnum.BUY_MONEY.getButtonName()));
 
         KeyboardRow row22222 = new KeyboardRow();
